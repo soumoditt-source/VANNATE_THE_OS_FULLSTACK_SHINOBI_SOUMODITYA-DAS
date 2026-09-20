@@ -11,7 +11,10 @@ export async function GET(request: Request) {
 
     // 1. Try real live Saurav India Health & Emergency Feed (No-key, zero-latency)
     try {
-      const liveRes = await fetch("https://saurav.tech/NewsAPI/top-headlines/category/health/in.json", { next: { revalidate: 300 } });
+      const liveRes = await fetch("https://saurav.tech/NewsAPI/top-headlines/category/health/in.json", { 
+        next: { revalidate: 300 },
+        signal: AbortSignal.timeout(2500)
+      });
       if (liveRes.ok) {
         const liveData = await liveRes.json();
         if (liveData.articles && Array.isArray(liveData.articles)) {
@@ -23,8 +26,8 @@ export async function GET(request: Request) {
           }));
         }
       }
-    } catch (err) {
-      console.warn("Live feed fetch warning:", err);
+    } catch {
+      // Fallback silently if third party host is unreachable
     }
 
     // 2. Try NewsAPI if available
