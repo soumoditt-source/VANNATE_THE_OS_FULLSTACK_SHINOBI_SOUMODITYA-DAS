@@ -1,7 +1,7 @@
 {
   "name": "vannate-ai",
   "version": "1.0.0",
-  "description": "VANNATE AI — Autonomous Humanitarian OS & Civic Emergency Grid for India",
+  "description": "VANNATE AI — Autonomous Humanitarian OS, Civic Emergency Grid & Zero-Mock Relief Operating System for India (Next.js 14, Tesseract WASM, Overpass OSM, AWS EC2)",
   "private": true,
   "engines": {
     "node": ">=20.0.0",
