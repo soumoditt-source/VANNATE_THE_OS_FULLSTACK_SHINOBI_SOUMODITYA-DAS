@@ -16,18 +16,29 @@
 # production
 /build
 
-# misc
+# misc & artifacts
 .DS_Store
 *.pem
+.snapshots/
+.snapshots
+*.snapshots
+.tempmediaStorage/
+*.log
+*.tmp
+*.bak
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files & credentials
 .env
 .env*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
