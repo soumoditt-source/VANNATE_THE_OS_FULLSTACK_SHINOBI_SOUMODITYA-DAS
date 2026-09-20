@@ -1,48 +1,90 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# ── Dependencies ──────────────────────────────────────────────
+node_modules/
+.pnp
 .pnp.js
 .yarn/install-state.gz
 
-# testing
+# ── Testing ───────────────────────────────────────────────────
 /coverage
+/test-results
 
-# next.js
+# ── Next.js Build Output ──────────────────────────────────────
 /.next/
 /out/
+/build/
 
-# production
-/build
+# ── Production build artifacts ────────────────────────────────
+.next/standalone
+.next/cache
 
-# misc & artifacts
+# ── IDE & OS ──────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ── Security — never commit these ─────────────────────────────
 *.pem
-.snapshots/
-.snapshots
-*.snapshots
-.tempmediaStorage/
-*.log
-*.tmp
-*.bak
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files & credentials
+*.key
+*.cert
+*.p12
+*.pfx
+*.jks
 .env
-.env*.local
+.env.*
+!.env.example
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# vercel
-.vercel
+# ── VANNATE specific — malware-free ───────────────────────────
+.snapshots/
+.snapshots
+*.snapshots
+.tempmediaStorage/
+brain/
+.agents/brain/
 
-# typescript
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+deploy.log
+.npm
+.eslintcache
+
+# ── Temp / Backup ─────────────────────────────────────────────
+*.tmp
+*.bak
+*.orig
+*.rej
+.cache/
+tmp/
+temp/
+
+# ── Docker ────────────────────────────────────────────────────
+.dockerignore
+
+# ── TypeScript ────────────────────────────────────────────────
 *.tsbuildinfo
 next-env.d.ts
+
+# ── Vercel ────────────────────────────────────────────────────
+.vercel
+
+# ── AWS / Cloud ───────────────────────────────────────────────
+.aws/
+amplify/.config/local-*
+amplify/backend/amplify-meta.json
+amplify/backend/.temp
+build/
+dist/

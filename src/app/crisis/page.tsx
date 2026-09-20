@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, MapPin, Camera, CheckCircle2, Navigation, Activity, ShieldAlert, Crosshair, Map, Leaf } from "lucide-react";
+import { AlertTriangle, MapPin, Camera, CheckCircle2, Navigation, Activity, ShieldAlert, Crosshair, Leaf, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import DynamicMap from "@/components/ui/DynamicMap";
 import LiveNewsFeed from "@/components/ui/LiveNewsFeed";
+import { useCameraPermission, useGeolocation } from "@/hooks/useDevicePermissions";
 
 const F = motion.div;
 
@@ -12,25 +13,57 @@ export default function CrisisHub() {
   const [tab, setTab] = useState<"sos" | "hotspots">("sos");
   const [sosState, setSosState] = useState<"idle" | "camera" | "verifying" | "dispatching" | "success">("idle");
   const [scanProgress, setScanProgress] = useState(0);
+  const [capturedLocation, setCapturedLocation] = useState<string | null>(null);
 
-  // Simulate AWS Rekognition scanning
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const camera = useCameraPermission();
+  const geo = useGeolocation();
+
+  // Stop camera when leaving SOS camera state
+  useEffect(() => {
+    if (sosState !== "camera") camera.stopCamera();
+  }, [sosState]);
+
+  // Cleanup on unmount
+  useEffect(() => () => camera.stopCamera(), []);
+
+  const handleTriggerSOS = useCallback(async () => {
+    setSosState("camera");
+    // Grab location simultaneously while opening camera
+    geo.requestLocation().then(coords => {
+      if (coords) setCapturedLocation(`${coords.lat.toFixed(5)}°N, ${coords.lng.toFixed(5)}°E${coords.city ? ` · ${coords.city}` : ""}`);
+    });
+    // Open real camera
+    await camera.requestCamera(videoRef.current);
+  }, [camera, geo]);
+
+  const handleCapture = useCallback(() => {
+    if (!videoRef.current || !canvasRef.current) {
+      setSosState("verifying"); return;
+    }
+    const v = videoRef.current;
+    const c = canvasRef.current;
+    c.width = v.videoWidth || 640;
+    c.height = v.videoHeight || 480;
+    c.getContext("2d")?.drawImage(v, 0, 0, c.width, c.height);
+    camera.stopCamera();
+    setSosState("verifying");
+    setScanProgress(0);
+  }, [camera]);
+
+  // Rekognition-style scan simulation (real image was captured above)
   useEffect(() => {
     if (sosState === "verifying") {
       const interval = setInterval(() => {
         setScanProgress(p => {
-          if (p >= 100) {
-            clearInterval(interval);
-            setSosState("dispatching");
-            return 100;
-          }
-          return p + Math.random() * 15;
+          if (p >= 100) { clearInterval(interval); setSosState("dispatching"); return 100; }
+          return p + Math.random() * 12;
         });
       }, 200);
       return () => clearInterval(interval);
     }
-    if (sosState === "dispatching") {
-      setTimeout(() => setSosState("success"), 2500);
-    }
+    if (sosState === "dispatching") setTimeout(() => setSosState("success"), 2500);
   }, [sosState]);
 
   return (
@@ -69,44 +102,79 @@ export default function CrisisHub() {
                   <ShieldAlert size={48} color="#dc2626" style={{ marginBottom: 24 }} />
                   <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12, textAlign: "center" }}>Life-Threatening Emergency?</h2>
                   <p style={{ color: "var(--text-muted)", textAlign: "center", maxWidth: 480, marginBottom: 36, lineHeight: 1.6 }}>
-                    Triggering the CivicLens SOS will bypass normal municipal queues and simultaneously alert Police, Fire, and Medical agencies using live open-street telemetry.
+                    Triggering CivicLens SOS will request your camera and GPS location, then simultaneously alert Police, Fire, and Medical agencies with live telemetry.
                   </p>
-                  
-                  <button 
-                    onClick={() => setSosState("camera")}
+                  <button
+                    onClick={handleTriggerSOS}
                     style={{
                       width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle at center, #ef4444 0%, #991b1b 100%)",
                       border: "8px solid rgba(239, 68, 68, 0.2)", color: "white", fontSize: 20, fontWeight: 800,
                       boxShadow: "0 0 60px rgba(220,38,38,0.4)", cursor: "pointer", transition: "transform 0.1s", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8
                     }}
-                    onMouseDown={e => e.currentTarget.style.transform = "scale(0.95)"}
-                    onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+                    onMouseDown={e => (e.currentTarget.style.transform = "scale(0.95)")}
+                    onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
                   >
                     <Crosshair size={32} />
                     TRIGGER SOS
                   </button>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 24 }}>Powered by AWS IoT & API Gateway</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 24 }}>Camera + GPS required · All data encrypted</p>
                 </div>
               )}
 
               {sosState === "camera" && (
-                <div className="glass" style={{ padding: 40, display: "flex", flexDirection: "column", alignItems: "center", position: "relative", overflow: "hidden" }}>
-                  <div style={{ position: "absolute", top: 16, left: 16, background: "rgba(0,0,0,0.5)", padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 8, height: 8, background: "#ef4444", borderRadius: "50%", animation: "pulse 1s infinite" }} /> LIVE
-                  </div>
-                  
-                  <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Capture the Hazard</h3>
-                  <p style={{ color: "var(--text-muted)", fontSize: 14, marginBottom: 24 }}>CivicLens requires visual evidence to prevent pranks.</p>
-                  
-                  {/* Simulated Camera Viewfinder */}
-                  <div style={{ width: "100%", maxWidth: 400, height: 300, background: "#0a0c10", borderRadius: 16, border: "2px solid rgba(255,255,255,0.1)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", backgroundImage: "url('https://images.unsplash.com/photo-1547683905-f686c993aae5?q=80&w=2000&auto=format&fit=crop')", backgroundSize: "cover", backgroundPosition: "center" }}>
-                    <div style={{ position: "absolute", inset: 20, border: "2px dashed rgba(255,255,255,0.4)", borderRadius: 12 }} />
-                    <Camera size={48} color="rgba(255,255,255,0.5)" />
+                <div className="glass" style={{ padding: 32, display: "flex", flexDirection: "column", alignItems: "center", gap: 16, position: "relative" }}>
+                  <div style={{ position: "absolute", top: 14, left: 16, background: "rgba(0,0,0,0.6)", padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 8, height: 8, background: "#ef4444", borderRadius: "50%", animation: "sos-pulse 1s infinite" }} /> LIVE
                   </div>
 
-                  <div style={{ display: "flex", gap: 16, marginTop: 32 }}>
-                    <button onClick={() => setSosState("idle")} className="btn-primary" style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--border)" }}>Cancel</button>
-                    <button onClick={() => setSosState("verifying")} className="btn-primary" style={{ background: "#ef4444" }}>Capture & Send</button>
+                  <h3 style={{ fontSize: 20, fontWeight: 700 }}>Capture the Hazard</h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: 14, textAlign: "center" }}>CivicLens requires real visual evidence. Point camera at the emergency.</p>
+
+                  {/* Camera error */}
+                  {camera.state === "denied" && (
+                    <div style={{ padding: "12px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, fontSize: 13, color: "#ef4444", textAlign: "center", maxWidth: 380 }}>
+                      {camera.error}
+                    </div>
+                  )}
+
+                  {/* Real video viewfinder */}
+                  <div style={{ width: "100%", maxWidth: 420, aspectRatio: "4/3", background: "#05070f", borderRadius: 16, border: "2px solid rgba(239,68,68,0.3)", position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <video
+                      ref={videoRef}
+                      playsInline muted autoPlay
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: camera.state === "granted" ? "block" : "none" }}
+                    />
+                    <canvas ref={canvasRef} style={{ display: "none" }} />
+                    {camera.state !== "granted" && (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                        {camera.state === "requesting"
+                          ? <Loader2 size={36} color="rgba(255,255,255,0.3)" style={{ animation: "spin 1s linear infinite" }} />
+                          : <Camera size={36} color="rgba(255,255,255,0.2)" />}
+                        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textAlign: "center", padding: "0 20px" }}>
+                          {camera.state === "requesting" ? "Opening camera…" : "Camera not active"}
+                        </p>
+                      </div>
+                    )}
+                    {camera.state === "granted" && (
+                      <div style={{ position: "absolute", inset: "15%", border: "2px dashed rgba(239,68,68,0.5)", borderRadius: 8 }} />
+                    )}
+                  </div>
+
+                  {capturedLocation && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#10b981" }}>
+                      <MapPin size={13} /> {capturedLocation}
+                    </div>
+                  )}
+
+                  <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+                    <button onClick={() => { camera.stopCamera(); setSosState("idle"); }}
+                      className="btn-primary" style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--border)" }}>
+                      Cancel
+                    </button>
+                    <button onClick={handleCapture} className="btn-primary" style={{ background: "#ef4444" }}
+                      disabled={camera.state === "requesting"}>
+                      <Camera size={15} /> Capture &amp; Send
+                    </button>
                   </div>
                 </div>
               )}
@@ -222,20 +290,17 @@ export default function CrisisHub() {
       </div>
 
       <style>{`
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-          70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        @keyframes sos-pulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+          50% { opacity: 0.4; box-shadow: 0 0 0 6px rgba(239,68,68,0); }
         }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-10px); }
         }
       `}</style>
+
     </div>
   );
 }

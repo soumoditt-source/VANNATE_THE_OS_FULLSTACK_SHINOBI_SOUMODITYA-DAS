@@ -1,12 +1,19 @@
 {
-  "name": "vannate-v2",
-  "version": "0.1.0",
+  "name": "vannate-ai",
+  "version": "1.0.0",
+  "description": "VANNATE AI — Autonomous Humanitarian OS & Civic Emergency Grid for India",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .next out build"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.15.6",
@@ -17,9 +24,11 @@
     "framer-motion": "^13.4.0",
     "lucide-react": "^1.47.0",
     "next": "14.2.35",
+    "next-auth": "^4.24.15",
     "react": "^18",
     "react-dom": "^18",
     "react-qr-code": "^2.2.0",
+    "tesseract.js": "^7.0.0",
     "three": "^0.165.0"
   },
   "devDependencies": {

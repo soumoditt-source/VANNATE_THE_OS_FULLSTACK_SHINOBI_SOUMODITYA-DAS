@@ -11,6 +11,8 @@ interface Particle {
   color: string; life: number; maxLife: number;
 }
 
+type Language = "hi" | "bn" | "en";
+
 const SCRIPT = [
   {
     id: 0, duration: 6000, isTitle: false,
@@ -42,6 +44,40 @@ const SCRIPT = [
   },
 ];
 
+// AI Voice narration scripts per language for each slide
+const VOICE_SCRIPTS: Record<Language, string[]> = {
+  en: [
+    "Charity given without expectation of return, at the proper time and place, to a worthy person — this is the purest Dharma. This principle is the foundation of VANNATE's Zero-Cash Relief Vault.",
+    "You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions. This is the principle behind VANNATE's Autonomous Volunteer Grid.",
+    "The entire world is one single family. For the generous and compassionate, there is no stranger. This philosophy drives VANNATE's Multi-Agency Emergency Grid.",
+    "Welcome to VANNATE AI. The Architecture of Dharma. Built on Humanity, Karma, and Compassion.",
+  ],
+  hi: [
+    "बिना किसी अपेक्षा के, सही समय और स्थान पर, किसी योग्य व्यक्ति को दिया गया दान — यही सबसे शुद्ध धर्म है। यही सिद्धांत VANNATE के शून्य-नकद राहत कोष की नींव है।",
+    "आपको अपने निर्धारित कर्तव्यों को निभाने का अधिकार है, लेकिन उनके फलों पर आपका कोई अधिकार नहीं है। यही VANNATE के स्वायत्त स्वयंसेवक ग्रिड का मार्गदर्शक सिद्धांत है।",
+    "यह सम्पूर्ण विश्व एक ही परिवार है। उदार और दयालु व्यक्ति के लिए कोई अजनबी नहीं होता। यही VANNATE के बहु-एजेंसी आपातकालीन ग्रिड की दर्शन है।",
+    "VANNATE AI में आपका स्वागत है। धर्म की वास्तुकला। मानवता, कर्म और करुणा पर आधारित।",
+  ],
+  bn: [
+    "বিনা প্রতিদান আশায়, সঠিক সময়ে ও স্থানে, যোগ্য ব্যক্তিকে দেওয়া দান — এটাই সর্বোচ্চ ধর্ম। এই নীতিই VANNATE-এর শূন্য-নগদ ত্রাণ ভল্টের ভিত্তি।",
+    "আপনার নির্ধারিত কর্তব্য পালন করার অধিকার আছে, কিন্তু তার ফলের উপর কোনো দাবি নেই। এটাই VANNATE-এর স্বায়ত্তশাসিত স্বেচ্ছাসেবক গ্রিডের মূলনীতি।",
+    "এই সমগ্র বিশ্ব এক পরিবার। উদার ও করুণাময়ের কাছে কোনো অপরিচিত নেই। এই দর্শনই VANNATE-এর বহু-সংস্থা জরুরি গ্রিডকে চালিত করে।",
+    "VANNATE AI-তে আপনাকে স্বাগতম। ধর্মের স্থাপত্য। মানবতা, কর্ম এবং করুণার উপর নির্মিত।",
+  ],
+};
+
+const LANG_OPTIONS: { code: Language; label: string; native: string; flag: string }[] = [
+  { code: "en", label: "English", native: "English", flag: "🇬🇧" },
+  { code: "hi", label: "Hindi", native: "हिंदी", flag: "🇮🇳" },
+  { code: "bn", label: "Bengali", native: "বাংলা", flag: "🪔" },
+];
+
+const LANG_VOICE_MAP: Record<Language, string> = {
+  en: "en-IN",
+  hi: "hi-IN",
+  bn: "bn-IN",
+};
+
 export default function IntroScene() {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,13 +89,46 @@ export default function IntroScene() {
   const [mounted, setMounted] = useState(false);
   const particlesRef = useRef<Particle[]>([]);
   const timeRef = useRef(0);
+  const [lang, setLang] = useState<Language | null>(null);
+  const [langChosen, setLangChosen] = useState(false);
+  const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => { setMounted(true); }, []);
 
+  // Speak narration for current slide
+  const speakSlide = useCallback((slideIndex: number, language: Language) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const text = VOICE_SCRIPTS[language][slideIndex];
+    if (!text) return;
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = LANG_VOICE_MAP[language];
+    utt.rate = 0.88;
+    utt.pitch = 1.05;
+    utt.volume = 1;
+    // Try to find a matching voice
+    const voices = window.speechSynthesis.getVoices();
+    const targetLang = LANG_VOICE_MAP[language];
+    const match = voices.find(v => v.lang === targetLang) ||
+                  voices.find(v => v.lang.startsWith(language)) ||
+                  voices.find(v => v.lang.startsWith("en"));
+    if (match) utt.voice = match;
+    speechRef.current = utt;
+    window.speechSynthesis.speak(utt);
+  }, []);
+
+  const stopSpeech = useCallback(() => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  }, []);
+
   useEffect(() => {
-    if (!mounted || step >= SCRIPT.length - 1) return;
+    if (!mounted || !langChosen || !lang || step >= SCRIPT.length - 1) return;
+    speakSlide(step, lang);
     const d = SCRIPT[step].duration;
     const t = setTimeout(() => {
+      stopSpeech();
       setFadeOut(true);
       setTimeout(() => {
         setStep(s => s + 1);
@@ -70,13 +139,19 @@ export default function IntroScene() {
     }, d);
     setFadeIn(true);
     setTimeout(() => setFadeIn(false), 1200);
-    return () => clearTimeout(t);
-  }, [step, mounted]);
+    return () => { clearTimeout(t); stopSpeech(); };
+  }, [step, mounted, langChosen, lang, speakSlide, stopSpeech]);
 
   const handleEnter = useCallback(() => {
+    stopSpeech();
     setPageOut(true);
     setTimeout(() => router.push("/"), 1000);
-  }, [router]);
+  }, [router, stopSpeech]);
+
+  const handleLangSelect = useCallback((code: Language) => {
+    setLang(code);
+    setLangChosen(true);
+  }, []);
 
   useEffect(() => {
     if (!mounted) return;
@@ -361,6 +436,94 @@ export default function IntroScene() {
   if (!mounted) return null;
 
   const current = SCRIPT[step];
+
+  // --- Language Picker Screen ---
+  if (!langChosen) {
+    return (
+      <div style={{
+        width: "100vw", height: "100vh",
+        background: "linear-gradient(135deg, #020308 0%, #080c1c 60%, #04060f 100%)",
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        gap: 0, position: "relative", overflow: "hidden",
+      }}>
+        {/* Animated background glow */}
+        <div style={{
+          position: "absolute", top: "30%", left: "50%", transform: "translateX(-50%)",
+          width: 500, height: 500,
+          background: "radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)",
+          borderRadius: "50%", pointerEvents: "none",
+          animation: "langGlowPulse 3s ease-in-out infinite",
+        }} />
+        <div style={{ position: "absolute", top: "3vh", left: "5vw", opacity: 0.7, zIndex: 10 }}>
+          <VannateLogo size={34} showText={true} glow={true} />
+        </div>
+        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 32 }}>
+          {/* Dharma Chakra symbol */}
+          <div style={{ fontSize: "clamp(2.5rem,6vw,4.5rem)", marginBottom: 4, filter: "drop-shadow(0 0 24px rgba(245,158,11,0.6))" }}>☸</div>
+          <div style={{ textAlign: "center" }}>
+            <h1 style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 900,
+              color: "#f59e0b", letterSpacing: "0.05em", marginBottom: 8,
+              textShadow: "0 0 40px rgba(245,158,11,0.4)",
+            }}>VANNATE AI</h1>
+            <p style={{
+              color: "rgba(255,255,255,0.45)", fontSize: "clamp(0.8rem,1.4vw,1rem)",
+              letterSpacing: "0.18em", textTransform: "uppercase",
+            }}>Choose Your Language · अपनी भाषा चुनें · আপনার ভাষা বেছে নিন</p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "min(340px, 90vw)" }}>
+            {LANG_OPTIONS.map(opt => (
+              <button
+                key={opt.code}
+                onClick={() => handleLangSelect(opt.code)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 18,
+                  padding: "18px 28px",
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(245,158,11,0.25)",
+                  borderRadius: 16, cursor: "pointer",
+                  backdropFilter: "blur(14px)",
+                  transition: "all 0.28s ease",
+                  width: "100%",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "rgba(245,158,11,0.12)";
+                  e.currentTarget.style.borderColor = "rgba(245,158,11,0.6)";
+                  e.currentTarget.style.transform = "scale(1.03)";
+                  e.currentTarget.style.boxShadow = "0 0 30px rgba(245,158,11,0.15)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                  e.currentTarget.style.borderColor = "rgba(245,158,11,0.25)";
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <span style={{ fontSize: "1.8rem" }}>{opt.flag}</span>
+                <div style={{ textAlign: "left" }}>
+                  <div style={{ color: "#fff", fontWeight: 700, fontSize: "1.05rem", letterSpacing: "0.03em" }}>{opt.native}</div>
+                  <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.78rem", letterSpacing: "0.06em", textTransform: "uppercase" }}>{opt.label}</div>
+                </div>
+                <span style={{ marginLeft: "auto", color: "rgba(245,158,11,0.5)", fontSize: "1.2rem" }}>→</span>
+              </button>
+            ))}
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.72rem", letterSpacing: "0.1em", marginTop: 8 }}>
+            AI voice narration enabled · वॉयस नैरेशन सक्षम · কণ্ঠ বর্ণনা সক্ষম
+          </p>
+        </div>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&display=swap');
+          @keyframes langGlowPulse {
+            0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div
