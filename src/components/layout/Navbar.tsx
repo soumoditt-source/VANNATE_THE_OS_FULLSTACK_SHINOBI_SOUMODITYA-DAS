@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Zap, ChevronDown, User, HeartHandshake, ShieldCheck } from "lucide-react";
+import { Menu, X, Zap, ChevronDown, User, HeartHandshake, ShieldCheck, BookOpen, Sparkles } from "lucide-react";
+import VannateLogo from "@/components/ui/VannateLogo";
 
 type Mode = "citizen" | "volunteer" | "admin";
 
@@ -60,13 +61,8 @@ export default function Navbar() {
         padding: "0 24px", height: 64,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-            <div style={{ width: 30, height: 30, background: activeMode.color, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.3s" }}>
-              <Zap size={16} color="white" />
-            </div>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: "var(--text)", letterSpacing: "-0.02em" }}>
-              Vannate
-            </span>
+          <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+            <VannateLogo size={32} showText={true} glow={true} />
           </Link>
 
           {/* Desktop Links based on Mode */}

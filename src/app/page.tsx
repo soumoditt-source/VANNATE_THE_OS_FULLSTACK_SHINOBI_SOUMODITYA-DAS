@@ -4,9 +4,10 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Zap, ShieldCheck, Heart, TrendingUp, ChevronRight, MapPin, Droplets, Bot, Globe as GlobeIcon } from "lucide-react";
 
-// Use the 3D globe component
+// Dynamic components (SSR-safe)
 const Globe = dynamic(() => import("@/components/three/Globe"), { ssr: false, loading: () => <div style={{ width: "100%", height: "100%" }} /> });
 const ClientTopology = dynamic(() => import("@/components/ui/ClientTopology"), { ssr: false });
+const GeetaShlokaSection = dynamic(() => import("@/components/ui/GeetaShlokaSection"), { ssr: false });
 import IntroRedirect from "@/components/layout/IntroRedirect";
 
 const STATS = [
@@ -168,6 +169,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ── Dharmic Ethos / Geeta Shlokas ── */}
+      <GeetaShlokaSection />
 
       {/* ── CTA Banner ── */}
       <section style={{ padding: "0 24px 96px" }}>

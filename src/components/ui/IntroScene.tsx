@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import VannateLogo from "./VannateLogo";
 
 interface Particle {
   x: number; y: number;
@@ -11,10 +12,34 @@ interface Particle {
 }
 
 const SCRIPT = [
-  { id: 0, duration: 5500, primary: "दातव्यमिति यद्दानं दीयतेऽनुपकारिणे।", secondary: "Charity given without expectation of return is the purest Dharma.", sub: "— Bhagavad Gita 17.20", isTitle: false },
-  { id: 1, duration: 4500, primary: "The world is not saved by algorithms.", secondary: "It is saved by human kindness, amplified by intelligence.", sub: "", isTitle: false },
-  { id: 2, duration: 5000, primary: "वसुधैव कुटुम्बकम्", secondary: "The entire world is one family.", sub: "— Maha Upanishad", isTitle: false },
-  { id: 3, duration: 99999, primary: "VANNATE AI", secondary: "The Architecture of Dharma", sub: "Humanity · Karma · Compassion", isTitle: true },
+  {
+    id: 0, duration: 6000, isTitle: false,
+    primary: "दातव्यमिति यद्दानं दीयतेऽनुपकारिणे।",
+    transliteration: "Dātavyam iti yad dānaṁ dīyate 'nupakāriṇe",
+    secondary: "Charity given without expectation of return, at the proper time and place, to a worthy person — this is the purest Dharma.",
+    sub: "— Bhagavad Gita 17.20 · Foundation of VANNATE's Zero-Cash Relief Vault",
+  },
+  {
+    id: 1, duration: 5500, isTitle: false,
+    primary: "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।",
+    transliteration: "Karmaṇy-evādhikāras te mā phaleṣu kadācana",
+    secondary: "You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of results, and never be attached to inaction.",
+    sub: "— Bhagavad Gita 2.47 · Principle Behind VANNATE's Autonomous Volunteer Grid",
+  },
+  {
+    id: 2, duration: 5500, isTitle: false,
+    primary: "वसुधैव कुटुम्बकम्",
+    transliteration: "Vasudhaiva Kuṭumbakam",
+    secondary: "The entire world is one single family. For the generous and compassionate, there is no stranger — only a member of the universal family not yet met.",
+    sub: "— Maha Upanishad 6.71-72 · The Philosophy of VANNATE's Multi-Agency Emergency Grid",
+  },
+  {
+    id: 3, duration: 99999, isTitle: true,
+    primary: "VANNATE AI",
+    transliteration: "",
+    secondary: "The Architecture of Dharma",
+    sub: "Humanity · Karma · Compassion",
+  },
 ];
 
 export default function IntroScene() {
@@ -377,44 +402,66 @@ export default function IntroScene() {
           animation: !fadeIn && !fadeOut ? "introTextIn 1s ease forwards" : "none",
         }}
       >
+        {/* Sanskrit Devanagari Primary */}
         <p style={{
-          fontFamily: current.isTitle ? "'Playfair Display', Georgia, serif" : "var(--font-inter), sans-serif",
+          fontFamily: current.isTitle ? "'Playfair Display', Georgia, serif" : "'Noto Sans Devanagari', Georgia, serif",
           fontSize: current.isTitle
             ? "clamp(3.5rem, 8vw, 7rem)"
-            : "clamp(1.4rem, 2.8vw, 2.4rem)",
-          fontWeight: current.isTitle ? 900 : 400,
-          color: current.isTitle ? "#f59e0b" : "#fff",
-          lineHeight: 1.2,
-          marginBottom: "1rem",
+            : "clamp(1.6rem, 3vw, 2.6rem)",
+          fontWeight: current.isTitle ? 900 : 600,
+          color: current.isTitle ? "#f59e0b" : "#FDE68A",
+          lineHeight: 1.3,
+          marginBottom: "0.5rem",
           textShadow: current.isTitle
             ? "0 0 60px rgba(245,158,11,0.5), 0 4px 30px rgba(0,0,0,0.9)"
-            : "0 4px 20px rgba(0,0,0,0.9)",
+            : "0 0 40px rgba(245,158,11,0.35), 0 4px 20px rgba(0,0,0,0.9)",
           letterSpacing: current.isTitle ? "0.06em" : "0.02em",
         }}>
           {current.primary}
         </p>
+
+        {/* Roman Transliteration (for non-title slides) */}
+        {!current.isTitle && (current as any).transliteration && (
+          <p style={{
+            fontFamily: "Georgia, serif",
+            fontStyle: "italic",
+            fontSize: "clamp(0.9rem, 1.4vw, 1.15rem)",
+            color: "rgba(16,185,129,0.85)",
+            marginBottom: "1rem",
+            letterSpacing: "0.04em",
+          }}>
+            {(current as any).transliteration}
+          </p>
+        )}
+
+        {/* English Translation */}
         <p style={{
           fontFamily: "var(--font-inter), sans-serif",
           fontSize: current.isTitle
             ? "clamp(1rem, 1.8vw, 1.4rem)"
-            : "clamp(0.95rem, 1.5vw, 1.2rem)",
-          color: current.isTitle ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.55)",
-          lineHeight: 1.65,
+            : "clamp(0.9rem, 1.4vw, 1.1rem)",
+          color: current.isTitle ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.6)",
+          lineHeight: 1.7,
           marginBottom: current.sub ? "0.5rem" : 0,
           fontWeight: 400,
-          maxWidth: current.isTitle ? "600px" : "720px",
+          maxWidth: current.isTitle ? "600px" : "780px",
           letterSpacing: current.isTitle ? "0.12em" : "0",
           textTransform: current.isTitle ? "uppercase" : "none",
         }}>
           {current.secondary}
         </p>
+
+        {/* Source Attribution & Tech Application */}
         {current.sub && (
           <p style={{
             fontFamily: "Georgia, serif",
             fontStyle: "italic",
-            fontSize: "clamp(0.75rem, 1vw, 0.9rem)",
-            color: "rgba(245,158,11,0.6)",
-            letterSpacing: "0.1em",
+            fontSize: "clamp(0.7rem, 0.9vw, 0.85rem)",
+            color: "rgba(245,158,11,0.65)",
+            letterSpacing: "0.08em",
+            marginTop: 4,
+            maxWidth: 780,
+            lineHeight: 1.5,
           }}>
             {current.sub}
           </p>
@@ -470,25 +517,14 @@ export default function IntroScene() {
         ))}
       </div>
 
+      {/* Top Logo Watermark */}
       <div style={{
         position: "absolute", top: "3vh", left: "5vw",
-        display: "flex", alignItems: "center", gap: "10px",
-        opacity: 0.65,
+        display: "flex", alignItems: "center", gap: "12px",
+        opacity: 0.8,
+        zIndex: 10,
       }}>
-        <div style={{
-          width: "28px", height: "28px", borderRadius: "50%",
-          border: "1.5px solid rgba(245,158,11,0.5)",
-          background: "rgba(245,158,11,0.08)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "12px",
-        }}>✦</div>
-        <span style={{
-          fontFamily: "Georgia, serif",
-          fontSize: "0.82rem",
-          color: "rgba(255,255,255,0.5)",
-          letterSpacing: "0.25em",
-          textTransform: "uppercase",
-        }}>Vannate AI</span>
+        <VannateLogo size={34} showText={true} glow={true} />
       </div>
 
       {!current.isTitle && (

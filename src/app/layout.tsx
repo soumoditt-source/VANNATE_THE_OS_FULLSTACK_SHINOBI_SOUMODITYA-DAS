@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import AICopilot from "@/components/ui/AICopilot";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Vannate 2.0 — Humanity's Operating System",
-  description: "Transparent donations, crisis response, and blood bank coordination — powered by AWS.",
-  themeColor: "#03040a",
+  title: "VANNATE AI — Autonomous Humanitarian OS & Civic Emergency Grid",
+  description: "India's first autonomous humanitarian OS: live crisis dispatch, zero-leakage relief vaults, AI verification, and paperless NGO operating system. Architected & built solely by Soumoditya Das.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -21,19 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         
-        {/* Global Hackathon Footer */}
-        <footer style={{ 
-          padding: "24px", 
-          textAlign: "center", 
-          background: "rgba(3,4,10,0.9)", 
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          color: "var(--text-muted)",
-          fontSize: 13,
-          fontFamily: "'Space Grotesk', sans-serif"
-        }}>
-          <p style={{ margin: 0 }}>AWS First Commit Hackathon | <strong style={{ color: "var(--brand)", letterSpacing: "1px" }}>ONLY BUILT BY SOUMODITYA DAS</strong></p>
-        </footer>
-
+        <Footer />
         <AICopilot />
       </body>
     </html>
