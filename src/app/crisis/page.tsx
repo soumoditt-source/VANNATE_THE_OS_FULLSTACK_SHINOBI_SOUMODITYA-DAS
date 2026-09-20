@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, MapPin, Camera, CheckCircle2, Navigation, Activity, ShieldAlert, Crosshair, Map, Leaf } from "lucide-react";
 import Link from "next/link";
+import DynamicMap from "@/components/ui/DynamicMap";
+import LiveNewsFeed from "@/components/ui/LiveNewsFeed";
 
 const F = motion.div;
 
@@ -177,57 +179,33 @@ export default function CrisisHub() {
 
           {tab === "hotspots" && (
             <F key="hotspots" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 350px", gap: 24, alignItems: "start" }}>
-                
-                {/* Simulated Map */}
-                <div className="glass" style={{ height: 600, padding: 0, overflow: "hidden", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0c10" }}>
-                  <Map size={48} color="rgba(255,255,255,0.1)" style={{ position: "absolute", zIndex: 0 }} />
-                  
-                  {/* Map Grid overlay to look techy */}
-                  <div style={{ position: "absolute", inset: 0, backgroundSize: "40px 40px", backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)", zIndex: 0 }} />
-                  
-                  {/* Hotspots */}
-                  <div style={{ position: "absolute", top: "30%", left: "40%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                    <div style={{ width: 40, height: 40, background: "rgba(239, 68, 68, 0.2)", border: "2px solid #ef4444", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", animation: "pulse 2s infinite" }}>
-                      <span style={{ fontSize: 12, fontWeight: 800, color: "#fff" }}>14</span>
-                    </div>
-                  </div>
-                  <div style={{ position: "absolute", top: "60%", left: "65%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                    <div style={{ width: 30, height: 30, background: "rgba(245, 158, 11, 0.2)", border: "2px solid #f59e0b", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, color: "#fff" }}>6</span>
-                    </div>
-                  </div>
-
-                  <div style={{ position: "absolute", bottom: 16, right: 16, background: "rgba(0,0,0,0.6)", padding: "8px 12px", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "var(--text-muted)", backdropFilter: "blur(8px)" }}>
-                    Amazon Location Service
-                  </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                <div style={{ padding: 24, background: "var(--surface)", borderRadius: 16, border: "1px solid var(--border)" }}>
+                  <DynamicMap />
                 </div>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div className="glass" style={{ padding: 20 }}>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Smart Clustering Active</h3>
-                    <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                      145 complaints automatically grouped into 3 distinct operational hotspots using geo-spatial AWS queries.
-                    </p>
-                  </div>
-
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
                   {[
-                    { title: "Live Electric Wire in Water", count: 14, type: "Critical", color: "#ef4444", loc: "Park Street, Sector 5" },
-                    { title: "Fallen Tree blocking ambulance", count: 6, type: "High", color: "#f59e0b", loc: "Bypass Road, EM" },
+                    { title: "Live Electric Wire in Water", count: 14, type: "Critical", color: "#ef4444", loc: "Park Street, Sector 5", detail: "14 citizen reports clustered. Power utility notified." },
+                    { title: "Fallen Tree blocking ambulance", count: 6, type: "High", color: "#f59e0b", loc: "Bypass Road, EM", detail: "Road cleared by civic responder unit #02." },
+                    { title: "Drinking Water Tanker Shortage", count: 22, type: "Moderate", color: "#3b82f6", loc: "Salt Lake Ward 11", detail: "Dispatched 200 water cans from central warehouse." }
                   ].map((h, i) => (
-                    <div key={i} className="glass" style={{ padding: 16, borderLeft: `4px solid ${h.color}` }}>
+                    <div key={i} className="glass" style={{ padding: 18, borderLeft: `4px solid ${h.color}` }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                        <h4 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{h.title}</h4>
-                        <span style={{ background: `${h.color}20`, color: h.color, padding: "4px 8px", borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
+                        <h4 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>{h.title}</h4>
+                        <span style={{ background: `${h.color}20`, color: h.color, padding: "3px 8px", borderRadius: 8, fontSize: 10, fontWeight: 800 }}>
                           {h.type}
                         </span>
                       </div>
-                      <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "0 0 12px 0", display: "flex", alignItems: "center", gap: 4 }}>
+                      <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 10px 0", display: "flex", alignItems: "center", gap: 4 }}>
                         <MapPin size={12} /> {h.loc}
                       </p>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}><strong>{h.count}</strong> clustered reports</span>
-                        <button style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text)", padding: "4px 12px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>View Detail</button>
+                      <p style={{ fontSize: 12, color: "var(--text)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
+                        {h.detail}
+                      </p>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 8 }}>
+                        <span style={{ fontSize: 11, color: "var(--text-muted)" }}><strong>{h.count}</strong> clustered reports</span>
+                        <span style={{ fontSize: 11, color: "#10b981", fontWeight: 700 }}>AWS Location Synced</span>
                       </div>
                     </div>
                   ))}
@@ -236,6 +214,11 @@ export default function CrisisHub() {
             </F>
           )}
         </AnimatePresence>
+
+        {/* Real Live Disaster Wire at Bottom */}
+        <div style={{ marginTop: 40 }}>
+          <LiveNewsFeed />
+        </div>
       </div>
 
       <style>{`

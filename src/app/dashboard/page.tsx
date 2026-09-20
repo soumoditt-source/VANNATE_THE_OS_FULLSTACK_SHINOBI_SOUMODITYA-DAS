@@ -1028,13 +1028,17 @@ export default function NgoManagementSystem() {
                 {/* NGO Pro / One-Time Setup */}
                 <div style={{ padding: 24, borderRadius: 16, background: "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.08))", border: "2px solid var(--brand)", position: "relative" }}>
                   <span style={{ position: "absolute", top: -12, right: 20, padding: "4px 12px", borderRadius: 12, background: "var(--brand)", color: "#fff", fontSize: 10, fontWeight: 800 }}>
-                    MOST POPULAR B2B
+                    FIRST 3 MONTHS FREE · DPIIT APPROVED
                   </span>
                   <div style={{ fontSize: 12, fontWeight: 800, color: "var(--brand)", textTransform: "uppercase" }}>Small & Medium NGOs</div>
                   <h3 style={{ fontSize: 22, fontWeight: 900, marginTop: 4 }}>Institutional OS</h3>
-                  <div style={{ fontSize: 32, fontWeight: 900, color: "#10b981", margin: "16px 0 8px" }}>₹49,999 <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>one-time setup</span></div>
+                  <div style={{ fontSize: 32, fontWeight: 900, color: "#10b981", margin: "16px 0 4px" }}>
+                    FREE <span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 700 }}>for 90 Days</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Then ₹49,999 one-time lifetime license</div>
                   <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 18 }}>Replaces all paper registers, stock ledgers, and muster rolls. 100% digital operations.</p>
                   <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8, fontSize: 12 }}>
+                    <li>✓ <strong>First 3 Months 100% Free</strong> (No Credit Card)</li>
                     <li>✓ Cryptographic SHA-256 Digital Logbooks</li>
                     <li>✓ Automated 80G Tax Exemption Generation</li>
                     <li>✓ Warehouse Stock & QR Barcode Dispatch</li>
@@ -1053,14 +1057,38 @@ export default function NgoManagementSystem() {
                     <li>✓ Multi-Branch Centralized Command</li>
                     <li>✓ AWS S3 Glacier Immutable Vault</li>
                     <li>✓ Ministry of Corporate Affairs CSR-1 filing export</li>
+                    <li>✓ Approved Corporate CSR Ads & Grant Matching</li>
                     <li>✓ 24/7 Dedicated Support & SLA</li>
                   </ul>
                 </div>
 
               </div>
 
+              {/* Govt & Anti-Black Money Compliance Protocol */}
+              <div style={{ marginTop: 24, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div style={{ padding: 20, background: "rgba(59,130,246,0.06)", borderRadius: 12, border: "1px solid rgba(59,130,246,0.25)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <ShieldCheck size={18} color="#3b82f6" />
+                    <h4 style={{ fontSize: 14, fontWeight: 800, color: "#3b82f6", margin: 0 }}>DPIIT Startup India & Govt Framework</h4>
+                  </div>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6, margin: 0 }}>
+                    Compliant with DPIIT Notification rules for civic tech & public utility platforms. Eligible NGOs receive verified Govt accreditation and 80-IAC tax exemption assistance.
+                  </p>
+                </div>
+
+                <div style={{ padding: 20, background: "rgba(16,185,129,0.06)", borderRadius: 12, border: "1px solid rgba(16,185,129,0.25)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <Lock size={18} color="#10b981" />
+                    <h4 style={{ fontSize: 14, fontWeight: 800, color: "#10b981", margin: 0 }}>100% Anti-Black Money & PMLA Elimination</h4>
+                  </div>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6, margin: 0 }}>
+                    Zero anonymous cash loops. Every donation is cryptographically mapped to verified PAN / Aadhaar identities and Darpan NGO accounts, generating an immutable audit trail for Financial Intelligence Unit (FIU-IND) compliance.
+                  </p>
+                </div>
+              </div>
+
               {/* ROI Pitch */}
-              <div style={{ marginTop: 32, padding: 20, background: "rgba(16,185,129,0.08)", borderRadius: 12, border: "1px solid rgba(16,185,129,0.2)" }}>
+              <div style={{ marginTop: 24, padding: 20, background: "rgba(16,185,129,0.08)", borderRadius: 12, border: "1px solid rgba(16,185,129,0.2)" }}>
                 <h4 style={{ fontSize: 15, fontWeight: 800, color: "#10b981", marginBottom: 6 }}>The Unbeatable NGO Value Proposition:</h4>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, margin: 0 }}>
                   A typical NGO in India spends over <strong>₹3,50,000 annually</strong> on physical printing, lost paper vouchers, courier delays for 80G receipts, accountant reconciliation, and audit penalties. Vannate NGO OS eliminates 100% of these paper inefficiencies with a single one-time setup—giving NGOs an immediate <strong>7x ROI in year one alone</strong> while unlocking institutional CSR grants through verified transparency.
