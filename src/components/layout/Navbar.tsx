@@ -14,6 +14,7 @@ const MODES: Record<Mode, { label: string; icon: React.ReactNode; color: string;
       { href: "/crisis", label: "Crisis Hub" },
       { href: "/blood", label: "Blood Bank" },
       { href: "/donate", label: "Donate" },
+      { href: "/dashboard", label: "NGO OS (B2B)" },
       { href: "/rewards", label: "Karma & Trees" },
       { href: "/community", label: "Community" },
     ]
