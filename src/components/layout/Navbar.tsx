@@ -124,6 +124,22 @@ export default function Navbar() {
             )}
           </div>
 
+          <Link
+            href="/intro"
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "7px 14px", borderRadius: 20,
+              background: "rgba(245,158,11,0.08)",
+              border: "1px solid rgba(245,158,11,0.25)",
+              color: "#fbbf24", fontSize: 13, fontWeight: 600,
+              textDecoration: "none", transition: "all 0.2s"
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.18)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.08)"; }}
+          >
+            <Sparkles size={13} /> Intro
+          </Link>
+
           <Link href="/login" className="btn-primary" style={{ padding: "8px 20px", fontSize: 14 }}>Sign In</Link>
         </div>
 
@@ -158,6 +174,13 @@ export default function Navbar() {
               textDecoration: "none", borderRadius: 8, background: "var(--surface)",
             }}>{l.label}</Link>
           ))}
+          <Link href="/intro" onClick={() => setOpen(false)} style={{
+            padding: "12px 16px", color: "#fbbf24", fontSize: 15, fontWeight: 600,
+            textDecoration: "none", borderRadius: 8, background: "rgba(245,158,11,0.08)",
+            border: "1px solid rgba(245,158,11,0.25)", display: "flex", alignItems: "center", gap: 8
+          }}>
+            <Sparkles size={16} /> Cinematic Intro
+          </Link>
           <Link href="/login" className="btn-primary" onClick={() => setOpen(false)}>Sign In</Link>
         </div>
       )}

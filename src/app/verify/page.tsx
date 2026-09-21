@@ -76,7 +76,8 @@ function analyseIndianCurrency(text: string): {
 
   // Serial number patterns (e.g. "7AB 894120", "2EF 123456")
   const serialRegex = /[0-9][A-Z]{2}\s*[0-9]{6}/gi;
-  const serials = [...new Set(text.match(serialRegex) || [])];
+  const matches = text.match(serialRegex) || [];
+  const serials = Array.from(new Set(matches));
   if (serials.length > 0) { confidence += 0.1; flags.push(`✅ Serial: ${serials[0]}`); }
 
   // Detect suspicious markers
@@ -407,7 +408,7 @@ export default function VerifyPage() {
                         {Math.round(ocrResult.confidence * 100)}%
                       </strong>
                     </p>
-                    {ocrResult.amount > 0 && (
+                    {typeof ocrResult.amount === "number" && ocrResult.amount > 0 && (
                       <div style={{ fontSize: 28, fontWeight: 900, color: "var(--text)" }}>₹{ocrResult.amount}</div>
                     )}
                   </div>

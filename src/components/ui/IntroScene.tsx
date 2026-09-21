@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import VannateLogo from "./VannateLogo";
 
 interface Particle {
@@ -91,6 +92,7 @@ export default function IntroScene() {
   const timeRef = useRef(0);
   const [lang, setLang] = useState<Language | null>(null);
   const [langChosen, setLangChosen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => { setMounted(true); }, []);
@@ -106,7 +108,6 @@ export default function IntroScene() {
     utt.rate = 0.88;
     utt.pitch = 1.05;
     utt.volume = 1;
-    // Try to find a matching voice
     const voices = window.speechSynthesis.getVoices();
     const targetLang = LANG_VOICE_MAP[language];
     const match = voices.find(v => v.lang === targetLang) ||
@@ -123,10 +124,21 @@ export default function IntroScene() {
     }
   }, []);
 
+  const goToStep = useCallback((newStep: number) => {
+    stopSpeech();
+    setFadeOut(true);
+    setTimeout(() => {
+      setStep(Math.max(0, Math.min(newStep, SCRIPT.length - 1)));
+      setFadeOut(false);
+      setFadeIn(true);
+      setTimeout(() => setFadeIn(false), 1000);
+    }, 400);
+  }, [stopSpeech]);
+
   useEffect(() => {
-    if (!mounted || !langChosen || !lang || step >= SCRIPT.length - 1) return;
+    if (!mounted || !langChosen || !lang || step >= SCRIPT.length - 1 || isPaused) return;
     speakSlide(step, lang);
-    const d = SCRIPT[step].duration;
+    const d = Math.max(SCRIPT[step].duration, 9000); // Plenty of time to read without vanishing
     const t = setTimeout(() => {
       stopSpeech();
       setFadeOut(true);
@@ -134,18 +146,18 @@ export default function IntroScene() {
         setStep(s => s + 1);
         setFadeOut(false);
         setFadeIn(true);
-        setTimeout(() => setFadeIn(false), 1200);
-      }, 800);
+        setTimeout(() => setFadeIn(false), 1000);
+      }, 500);
     }, d);
     setFadeIn(true);
-    setTimeout(() => setFadeIn(false), 1200);
+    setTimeout(() => setFadeIn(false), 1000);
     return () => { clearTimeout(t); stopSpeech(); };
-  }, [step, mounted, langChosen, lang, speakSlide, stopSpeech]);
+  }, [step, mounted, langChosen, lang, isPaused, speakSlide, stopSpeech]);
 
   const handleEnter = useCallback(() => {
     stopSpeech();
     setPageOut(true);
-    setTimeout(() => router.push("/"), 1000);
+    setTimeout(() => router.push("/"), 800);
   }, [router, stopSpeech]);
 
   const handleLangSelect = useCallback((code: Language) => {
@@ -553,6 +565,8 @@ export default function IntroScene() {
 
       <div
         key={step}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
         style={{
           position: "absolute", bottom: 0, left: 0, right: 0,
           padding: "0 6vw 8vh",
@@ -629,55 +643,128 @@ export default function IntroScene() {
             {current.sub}
           </p>
         )}
+
         {current.isTitle && (
-          <button
-            onClick={handleEnter}
-            style={{
-              marginTop: "2.5rem",
-              background: "rgba(245,158,11,0.1)",
-              border: "1px solid rgba(245,158,11,0.45)",
-              color: "#f59e0b",
-              padding: "14px 42px",
-              fontSize: "0.88rem",
-              fontWeight: 700,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              borderRadius: "50px",
-              cursor: "pointer",
-              backdropFilter: "blur(12px)",
-              boxShadow: "0 0 30px rgba(245,158,11,0.12)",
-              transition: "all 0.35s ease",
-              animation: "ctaPulse 2.5s ease-in-out infinite",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(245,158,11,0.22)";
-              e.currentTarget.style.boxShadow = "0 0 50px rgba(245,158,11,0.35)";
-              e.currentTarget.style.transform = "scale(1.04)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(245,158,11,0.1)";
-              e.currentTarget.style.boxShadow = "0 0 30px rgba(245,158,11,0.12)";
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-          >
-            Awaken System ✦
-          </button>
+          <div style={{
+            display: "flex",
+            gap: "16px",
+            marginTop: "2.5rem",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center"
+          }}>
+            <button
+              onClick={handleEnter}
+              style={{
+                background: "rgba(245,158,11,0.12)",
+                border: "1px solid rgba(245,158,11,0.5)",
+                color: "#f59e0b",
+                padding: "14px 38px",
+                fontSize: "0.88rem",
+                fontWeight: 700,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                borderRadius: "50px",
+                cursor: "pointer",
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 0 30px rgba(245,158,11,0.15)",
+                transition: "all 0.35s ease",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "rgba(245,158,11,0.25)";
+                e.currentTarget.style.boxShadow = "0 0 50px rgba(245,158,11,0.4)";
+                e.currentTarget.style.transform = "scale(1.04)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "rgba(245,158,11,0.12)";
+                e.currentTarget.style.boxShadow = "0 0 30px rgba(245,158,11,0.15)";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            >
+              Awaken System ✦
+            </button>
+            <Link
+              href="/donate"
+              style={{
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                border: "1px solid rgba(16,185,129,0.5)",
+                color: "#ffffff",
+                padding: "14px 34px",
+                fontSize: "0.88rem",
+                fontWeight: 700,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                borderRadius: "50px",
+                cursor: "pointer",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 0 25px rgba(16,185,129,0.3)",
+                transition: "all 0.35s ease",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = "scale(1.04)";
+                e.currentTarget.style.boxShadow = "0 0 40px rgba(16,185,129,0.5)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = "0 0 25px rgba(16,185,129,0.3)";
+              }}
+            >
+              Donate Now →
+            </Link>
+          </div>
         )}
       </div>
 
+      {/* Slide Navigation Controls */}
       <div style={{
         position: "absolute", bottom: "3.5vh", left: "50%",
         transform: "translateX(-50%)",
-        display: "flex", gap: "8px",
+        display: "flex", alignItems: "center", gap: "12px",
+        zIndex: 10
       }}>
-        {SCRIPT.map((_, i) => (
-          <div key={i} style={{
-            width: i === step ? "24px" : "6px",
-            height: "6px", borderRadius: "3px",
-            background: i === step ? "#f59e0b" : "rgba(255,255,255,0.2)",
-            transition: "all 0.4s ease",
-          }} />
-        ))}
+        {step > 0 && (
+          <button
+            onClick={() => goToStep(step - 1)}
+            style={{
+              background: "none", border: "none", color: "rgba(255,255,255,0.4)",
+              cursor: "pointer", fontSize: "0.9rem", padding: "4px 8px"
+            }}
+            title="Previous verse"
+          >
+            ‹
+          </button>
+        )}
+        <div style={{ display: "flex", gap: "8px" }}>
+          {SCRIPT.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goToStep(i)}
+              style={{
+                width: i === step ? "24px" : "6px",
+                height: "6px", borderRadius: "3px",
+                background: i === step ? "#f59e0b" : "rgba(255,255,255,0.25)",
+                border: "none", padding: 0, cursor: "pointer",
+                transition: "all 0.4s ease",
+              }}
+              title={`Slide ${i + 1}`}
+            />
+          ))}
+        </div>
+        {step < SCRIPT.length - 1 && (
+          <button
+            onClick={() => goToStep(step + 1)}
+            style={{
+              background: "none", border: "none", color: "rgba(255,255,255,0.4)",
+              cursor: "pointer", fontSize: "0.9rem", padding: "4px 8px"
+            }}
+            title="Next verse"
+          >
+            ›
+          </button>
+        )}
       </div>
 
       {/* Top Logo Watermark */}
@@ -690,23 +777,44 @@ export default function IntroScene() {
         <VannateLogo size={34} showText={true} glow={true} />
       </div>
 
-      {!current.isTitle && (
+      {/* Top Right Quick Actions */}
+      <div style={{
+        position: "absolute", top: "3vh", right: "5vw",
+        display: "flex", alignItems: "center", gap: "14px",
+        zIndex: 10
+      }}>
+        <Link
+          href="/donate"
+          style={{
+            background: "rgba(16,185,129,0.12)",
+            border: "1px solid rgba(16,185,129,0.35)",
+            color: "#34d399",
+            padding: "6px 16px",
+            borderRadius: "999px",
+            fontSize: "0.78rem",
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textDecoration: "none",
+            transition: "all 0.2s ease"
+          }}
+        >
+          Donate Now
+        </Link>
         <button
           onClick={handleEnter}
           style={{
-            position: "absolute", top: "3vh", right: "5vw",
             background: "none", border: "none",
-            color: "rgba(255,255,255,0.3)",
+            color: "rgba(255,255,255,0.4)",
             fontSize: "0.8rem", letterSpacing: "0.15em",
             textTransform: "uppercase", cursor: "pointer",
             transition: "color 0.3s",
           }}
-          onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
-          onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.3)"}
+          onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.85)"}
+          onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
         >
-          Skip →
+          Skip to OS →
         </button>
-      )}
+      </div>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap');

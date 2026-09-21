@@ -8,7 +8,6 @@ import { Zap, ShieldCheck, Heart, TrendingUp, ChevronRight, MapPin, Droplets, Bo
 const Globe = dynamic(() => import("@/components/three/Globe"), { ssr: false, loading: () => <div style={{ width: "100%", height: "100%" }} /> });
 const ClientTopology = dynamic(() => import("@/components/ui/ClientTopology"), { ssr: false });
 const GeetaShlokaSection = dynamic(() => import("@/components/ui/GeetaShlokaSection"), { ssr: false });
-import IntroRedirect from "@/components/layout/IntroRedirect";
 
 const STATS = [
   { label: "Lives Impacted", value: "2.4M+", icon: Heart, color: "#ef4444" },
@@ -49,7 +48,6 @@ const F = motion.div;
 export default function HomePage() {
   return (
     <div style={{ paddingTop: 64, position: "relative" }}>
-      <IntroRedirect />
       <ClientTopology />
 
       {/* ── Hero ── */}
